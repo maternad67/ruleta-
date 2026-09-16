@@ -400,13 +400,46 @@
         
         const colors = ["#143a3b", "#d4af37", "#1c5253", "#f9a825", "#0d2728", "#c5a030"];
 
-        // --- POMOCNÁ FUNKCE PRO ODSTRANĚNÍ DIAKRITIKY A MEZER ---
-        // Udělá z "Váša", "Vaša ", "vasa" nebo "VÁŠA" vždy jen čisté "vasa"
+        // --- ZVUKOVÝ SYSTÉM (SYNTETIZÁTOR) ---
+        let audioCtx;
+
+        function initAudio() {
+            // Aktivuje se jen když uživatel klikne, kvůli bezpečnosti prohlížečů
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playClickSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            // "Triangle" vlna pro hrubší mechanický zvuk
+            osc.type = 'triangle';
+            // Zvuk rychle klesne z 250Hz na 50Hz, což zní jako "cvaknutí"
+            osc.frequency.setValueAtTime(250, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.05);
+            
+            // Okamžitě to zesílí a pak utlumí (dlouhé jen 0.05 sekundy)
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        // -------------------------------------
+
         function normalizeName(name) {
             return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         }
 
-        // --- TAJNÁ LOGIKA PRO PÁROVÁNÍ ---
         const secretPairs = [
             ["vasa", "terka"],
             ["david", "eliska"]
@@ -427,7 +460,6 @@
             let currentTeam = teams[currentTeamIndex];
             let isLastSlot = (currentTeam.length === teamSize - 1);
 
-            // Zjistíme, jestli má někdo z tajného páru už parťáka v aktuálním týmu
             for (let pair of secretPairs) {
                 let p1 = pair[0];
                 let p2 = pair[1];
@@ -448,7 +480,6 @@
 
             let validCandidates = remainingNames.map((n, i) => i);
             
-            // Ochrana před rozdělením párů na posledním volném místě v týmu
             if (isLastSlot && teamSize >= 2) {
                 validCandidates = validCandidates.filter(i => !isHalfOfAvailablePair(remainingNames[i]));
                 if (validCandidates.length === 0) {
@@ -458,7 +489,6 @@
             
             return validCandidates[Math.floor(Math.random() * validCandidates.length)];
         }
-        // ---------------------------------
 
         function startRoulette() {
             const inputs = document.querySelectorAll("#names-list input");
@@ -548,6 +578,8 @@
             if (isSpinning || remainingNames.length === 0) return;
             isSpinning = true;
             
+            initAudio(); // Probuzení zvuku při stisknutí tlačítka
+            
             document.getElementById("winner-text").innerText = "Losování...";
             document.getElementById("spin-btn").disabled = true;
 
@@ -566,6 +598,7 @@
 
             const spinTimeTotal = Math.random() * 1000 + 3500; 
             let startTime = null;
+            let lastSliceIndex = -1; // Sledujeme, abychom necvakali 2x na stejném políčku
 
             function rotate(timestamp) {
                 if (!startTime) startTime = timestamp;
@@ -580,6 +613,20 @@
                 }
                 
                 currentAngle = easeOutCubic(progress, startAngle, endAngle - startAngle, spinTimeTotal);
+                
+                // --- DETEKCE HRANY PRO ZVUK CVAKNUTÍ ---
+                let currentDeg = currentAngle % (2 * Math.PI);
+                let pointerAngle = (3 * Math.PI / 2) - currentDeg;
+                if (pointerAngle < 0) pointerAngle += 2 * Math.PI;
+                let currentSliceIndex = Math.floor(pointerAngle / sliceAngle);
+                
+                // Když se změní index políčka (šipka překročí čáru), přehraj zvuk
+                if (lastSliceIndex !== -1 && currentSliceIndex !== lastSliceIndex) {
+                    playClickSound();
+                }
+                lastSliceIndex = currentSliceIndex;
+                // ----------------------------------------
+                
                 drawWheel();
                 requestAnimationFrame(rotate);
             }
