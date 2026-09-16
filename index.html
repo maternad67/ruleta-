@@ -400,11 +400,10 @@
         
         const colors = ["#143a3b", "#d4af37", "#1c5253", "#f9a825", "#0d2728", "#c5a030"];
 
-        // --- ZVUKOVÝ SYSTÉM (SYNTETIZÁTOR) ---
+        // --- VYLEPŠENÝ ZVUKOVÝ SYSTÉM (BÍLÝ ŠUM = MECHANICKÉ KLAPNUTÍ) ---
         let audioCtx;
 
         function initAudio() {
-            // Aktivuje se jen když uživatel klikne, kvůli bezpečnosti prohlížečů
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
@@ -415,26 +414,39 @@
 
         function playClickSound() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
             
-            // "Triangle" vlna pro hrubší mechanický zvuk
-            osc.type = 'triangle';
-            // Zvuk rychle klesne z 250Hz na 50Hz, což zní jako "cvaknutí"
-            osc.frequency.setValueAtTime(250, audioCtx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.05);
+            // Vytvoříme buffer pro bílý šum (velmi krátký)
+            const bufferSize = audioCtx.sampleRate * 0.05; // 0.05 sekundy
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
             
-            // Okamžitě to zesílí a pak utlumí (dlouhé jen 0.05 sekundy)
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            // Naplníme buffer náhodnými hodnotami (šum)
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
             
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
             
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.05);
+            // Použijeme filtr, abychom odřízli vysoké frekvence a znělo to tupěji (více jako plast/dřevo)
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 1000;
+            
+            // Gain node pro utlumení zvuku
+            const gainNode = audioCtx.createGain();
+            
+            // Zvuk musí velmi prudce klesnout (perkusivní obálka)
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+            
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            noise.start();
         }
-        // -------------------------------------
+        // -------------------------------------------------------------------
 
         function normalizeName(name) {
             return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -578,7 +590,7 @@
             if (isSpinning || remainingNames.length === 0) return;
             isSpinning = true;
             
-            initAudio(); // Probuzení zvuku při stisknutí tlačítka
+            initAudio(); 
             
             document.getElementById("winner-text").innerText = "Losování...";
             document.getElementById("spin-btn").disabled = true;
@@ -598,7 +610,7 @@
 
             const spinTimeTotal = Math.random() * 1000 + 3500; 
             let startTime = null;
-            let lastSliceIndex = -1; // Sledujeme, abychom necvakali 2x na stejném políčku
+            let lastSliceIndex = -1; 
 
             function rotate(timestamp) {
                 if (!startTime) startTime = timestamp;
@@ -614,18 +626,15 @@
                 
                 currentAngle = easeOutCubic(progress, startAngle, endAngle - startAngle, spinTimeTotal);
                 
-                // --- DETEKCE HRANY PRO ZVUK CVAKNUTÍ ---
                 let currentDeg = currentAngle % (2 * Math.PI);
                 let pointerAngle = (3 * Math.PI / 2) - currentDeg;
                 if (pointerAngle < 0) pointerAngle += 2 * Math.PI;
                 let currentSliceIndex = Math.floor(pointerAngle / sliceAngle);
                 
-                // Když se změní index políčka (šipka překročí čáru), přehraj zvuk
                 if (lastSliceIndex !== -1 && currentSliceIndex !== lastSliceIndex) {
                     playClickSound();
                 }
                 lastSliceIndex = currentSliceIndex;
-                // ----------------------------------------
                 
                 drawWheel();
                 requestAnimationFrame(rotate);
