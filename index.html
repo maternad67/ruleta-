@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<!-- Pokud bys chtěl vlastní ikonku na ploše: -->
-<link rel="apple-touch-icon" href="cesta-k-tvemu-obrazku.png">
-
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Maximo smyko - Tvorba týmů</title>
     <style>
         body {
-            background-color: #0b0b1a;
+            /* Tady je napojené tvé pozadí s lahvemi */
+            background-image: url('pozadi.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -24,76 +26,129 @@
             box-sizing: border-box;
         }
 
+        /* Aby byl text čitelný přes to pestré pozadí, dáme mu poloprůhledný podklad */
         .container {
+            background: rgba(11, 11, 26, 0.85);
+            padding: 30px;
+            border-radius: 20px;
             text-align: center;
             max-width: 800px;
             width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            backdrop-filter: blur(5px);
         }
 
         h2 {
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
-            font-size: 32px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px rgba(138, 43, 226, 1);
+            font-size: 36px;
+            letter-spacing: 1px;
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: bold;
-            color: #d8b4fe;
-            font-size: 18px;
+            color: #e9d5ff;
+            font-size: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         input[type="number"] {
-            background: #15152a;
+            background: rgba(21, 21, 42, 0.9);
             color: white;
             border: 2px solid #8a2be2;
             border-radius: 8px;
             padding: 10px;
-            font-size: 18px;
-            width: 100px;
+            font-size: 20px;
+            width: 120px;
             text-align: center;
             outline: none;
-        }
-
-        textarea {
-            width: 300px;
-            height: 150px;
-            background: #15152a;
-            color: white;
-            border: 2px solid #8a2be2;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            outline: none;
-            resize: none;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
 
-        button {
+        /* Styly pro nová oddělená políčka na jména */
+        #names-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .name-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .name-row input {
+            background: rgba(21, 21, 42, 0.9);
+            color: white;
+            border: 2px solid #8a2be2;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 18px;
+            width: 200px;
+            outline: none;
+        }
+
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0;
+            line-height: 30px;
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+        }
+
+        .add-btn {
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 25px;
+            box-shadow: 0 0 10px rgba(46, 213, 115, 0.5);
+        }
+
+        /* Hlavní tlačítka (Začít losovat / Zatočit) */
+        .primary-btn {
             background: linear-gradient(90deg, #9400d3, #8a2be2);
             border: none;
-            padding: 15px 40px;
+            padding: 15px 50px;
             color: white;
-            font-size: 18px;
+            font-size: 20px;
             border-radius: 30px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
             transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        button:hover:not(:disabled) {
+        .primary-btn:hover:not(:disabled) {
             transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(138, 43, 226, 0.9);
+            box-shadow: 0 0 30px rgba(138, 43, 226, 1);
         }
 
-        button:disabled {
+        .primary-btn:disabled {
             background: #4a4a4a;
             box-shadow: none;
             cursor: not-allowed;
@@ -102,7 +157,7 @@
 
         #roulette-screen {
             display: none;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         .wheel-wrapper {
@@ -113,67 +168,81 @@
 
         canvas {
             border-radius: 50%;
-            box-shadow: 0 0 40px rgba(138, 43, 226, 0.3);
-            border: 5px solid #2a2a4a;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6);
+            border: 6px solid #2a2a4a;
+            background: #000;
+        }
+
+        /* Obrázek koruny uprostřed rulety */
+        #center-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;  /* Velikost koruny - můžeš si upravit */
+            height: auto;
+            z-index: 5;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+            pointer-events: none; /* Aby neblokovala klikání */
         }
 
         .pointer {
             position: absolute;
-            top: -15px;
+            top: -20px;
             left: 50%;
             transform: translateX(-50%);
             width: 0; 
             height: 0; 
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 35px solid #e0e0e0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 45px solid #ffffff;
             z-index: 10;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
         }
 
         #status-text {
-            height: 30px;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 15px;
-            color: #d8b4fe;
+            margin-bottom: 10px;
+            color: #e9d5ff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         #winner-text {
-            height: 35px;
-            font-size: 28px;
+            height: 40px;
+            font-size: 32px;
             font-weight: bold;
             margin-bottom: 20px;
             color: #ffffff;
-            text-shadow: 0 0 10px #8a2be2;
+            text-shadow: 0 0 15px #8a2be2, 0 0 30px #9400d3;
         }
 
-        /* Sekce pro zobrazení vylosovaných týmů */
         #teams-display {
             margin-top: 30px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .team-card {
-            background: #15152a;
-            border: 2px solid #663399;
-            border-radius: 10px;
-            padding: 15px;
-            min-width: 150px;
+            background: rgba(21, 21, 42, 0.9);
+            border: 2px solid #9400d3;
+            border-radius: 12px;
+            padding: 15px 25px;
+            min-width: 160px;
             text-align: left;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         .team-card h3 {
-            margin: 0 0 10px 0;
-            color: #d8b4fe;
-            border-bottom: 1px solid #663399;
-            padding-bottom: 5px;
-            font-size: 18px;
+            margin: 0 0 12px 0;
+            color: #e9d5ff;
+            border-bottom: 2px solid #9400d3;
+            padding-bottom: 8px;
+            font-size: 20px;
             text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .team-card ul {
@@ -184,8 +253,9 @@
 
         .team-card li {
             margin-bottom: 8px;
-            font-size: 16px;
+            font-size: 18px;
             text-align: center;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -201,17 +271,14 @@
         </div>
 
         <div class="input-group">
-            <label for="names-input">Jména hráčů (každé na nový řádek):</label>
-            <textarea id="names-input">
-Hráč 1
-Hráč 2
-Hráč 3
-Hráč 4
-Hráč 5
-Hráč 6</textarea>
+            <label>Jména hráčů:</label>
+            <div id="names-list">
+                <!-- Zde se generují políčka pomocí JS -->
+            </div>
+            <button class="add-btn" onclick="addNameField()">+ Přidat hráče</button>
         </div>
         
-        <button onclick="startRoulette()">Začít losovat</button>
+        <button class="primary-btn" onclick="startRoulette()">Začít losovat</button>
     </div>
 
     <!-- Obrazovka s ruletou -->
@@ -221,34 +288,68 @@ Hráč 6</textarea>
         
         <div class="wheel-wrapper" id="wheel-container">
             <div class="pointer"></div>
-            <canvas id="wheel" width="350" height="350"></canvas>
+            <!-- TVOJE LOGO UPROSTŘED -->
+            <img src="koruna.png" id="center-logo" alt="Maximo smyko">
+            <canvas id="wheel" width="380" height="380"></canvas>
         </div>
         
         <br>
-        <button id="spin-btn" onclick="spin()">Zatočit (Spin)</button>
+        <button class="primary-btn" id="spin-btn" onclick="spin()">Zatočit (Spin)</button>
 
         <!-- Zde se budou generovat týmy -->
         <div id="teams-display"></div>
     </div>
 
     <script>
+        // Inicializace dynamických políček
+        const initialNames = ["Hráč 1", "Hráč 2", "Hráč 3", "Hráč 4"];
+        
+        function addNameField(value = "") {
+            const list = document.getElementById("names-list");
+            const row = document.createElement("div");
+            row.className = "name-row";
+            
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = value;
+            input.placeholder = "Jméno hráče";
+            
+            const removeBtn = document.createElement("button");
+            removeBtn.className = "remove-btn";
+            removeBtn.innerText = "×";
+            removeBtn.onclick = function() {
+                list.removeChild(row);
+            };
+            
+            row.appendChild(input);
+            row.appendChild(removeBtn);
+            list.appendChild(row);
+        }
+
+        // Naplnění počátečních políček
+        initialNames.forEach(name => addNameField(name));
+
+
+        // Logika rulety
         const canvas = document.getElementById("wheel");
         const ctx = canvas.getContext("2d");
         const radius = canvas.width / 2;
         
         let remainingNames = [];
         let teamSize = 2;
-        let teams = [[]]; // Pole pro ukládání týmů
-        let currentTeamIndex = 0; // Který tým se zrovna plní
-
+        let teams = [[]];
+        let currentTeamIndex = 0;
         let currentAngle = 0;
         let isSpinning = false;
         
+        // Barvy dílků
         const colors = ["#8a2be2", "#663399", "#9400d3", "#4b0082", "#9932cc", "#7b68ee"];
 
         function startRoulette() {
-            const input = document.getElementById("names-input").value;
-            remainingNames = input.split('\n').map(n => n.trim()).filter(n => n !== "");
+            // Posbíráme jména ze všech políček
+            const inputs = document.querySelectorAll("#names-list input");
+            remainingNames = Array.from(inputs).map(inp => inp.value.trim()).filter(n => n !== "");
+            
             teamSize = parseInt(document.getElementById("team-size").value);
             
             if(remainingNames.length < 2) {
@@ -260,7 +361,6 @@ Hráč 6</textarea>
                 return;
             }
 
-            // Inicializace proměnných pro novou hru
             teams = [[]];
             currentTeamIndex = 0;
             currentAngle = 0;
@@ -275,8 +375,7 @@ Hráč 6</textarea>
 
         function drawWheel() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            if (remainingNames.length === 0) return; // Není co kreslit
+            if (remainingNames.length === 0) return;
 
             const sliceAngle = (2 * Math.PI) / remainingNames.length;
 
@@ -298,18 +397,27 @@ Hráč 6</textarea>
                 ctx.rotate(startAngle + sliceAngle / 2);
                 ctx.textAlign = "right";
                 ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 16px sans-serif";
+                // Zvětšený font v ruletě
+                ctx.font = "bold 20px sans-serif";
                 
-                // Pokud je v ruletě už jen jedno jméno, vycentrujeme ho jinak
+                // Necháme uprostřed volné místo pro korunu (proto text končí dál od středu)
                 if (remainingNames.length === 1) {
                     ctx.textAlign = "center";
-                    ctx.fillText(remainingNames[i], 0, 0);
+                    ctx.fillText(remainingNames[i], 0, -radius/2);
                 } else {
-                    ctx.fillText(remainingNames[i], radius - 20, 6);
+                    ctx.fillText(remainingNames[i], radius - 20, 7);
                 }
-                
                 ctx.restore();
             }
+            
+            // Vykreslení tmavého kruhu uprostřed pod korunu (aby texty nezasahovaly pod ni)
+            ctx.beginPath();
+            ctx.arc(radius, radius, 55, 0, 2 * Math.PI);
+            ctx.fillStyle = "#0b0b1a";
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#8a2be2";
+            ctx.stroke();
         }
 
         function spin() {
@@ -319,7 +427,7 @@ Hráč 6</textarea>
             document.getElementById("winner-text").innerText = "Losování...";
             document.getElementById("spin-btn").disabled = true;
 
-            const spinTimeTotal = Math.random() * 2000 + 3000; 
+            const spinTimeTotal = Math.random() * 2000 + 3500; 
             const spinAngleStart = Math.random() * 10 + 20; 
             
             let spinTime = 0;
@@ -346,7 +454,6 @@ Hráč 6</textarea>
         }
 
         function processWinner() {
-            // Výpočet indexu výherce
             let index = 0;
             if (remainingNames.length > 1) {
                 const sliceAngle = (2 * Math.PI) / remainingNames.length;
@@ -361,27 +468,21 @@ Hráč 6</textarea>
             const winner = remainingNames[index];
             document.getElementById("winner-text").innerText = winner + "!";
 
-            // 1. Přidat výherce do aktuálního týmu
             teams[currentTeamIndex].push(winner);
-            
-            // 2. Odebrat výherce z rulety
             remainingNames.splice(index, 1);
 
-            // 3. Zkontrolovat, jestli se tým naplnil
             if (teams[currentTeamIndex].length >= teamSize && remainingNames.length > 0) {
-                teams.push([]); // Vytvoříme další tým
-                currentTeamIndex++; // Posuneme se na něj
+                teams.push([]); 
+                currentTeamIndex++; 
             }
 
             renderTeamsUI();
             updateStatusText();
 
-            // Pokud ještě zbývají lidé, překreslíme ruletu bez výherce
             if (remainingNames.length > 0) {
                 drawWheel();
                 document.getElementById("spin-btn").disabled = false;
             } else {
-                // Všichni byli rozlosováni
                 document.getElementById("wheel-container").style.display = "none";
                 document.getElementById("status-text").innerText = "Rozlosování je kompletní!";
                 document.getElementById("winner-text").innerText = "";
@@ -398,10 +499,9 @@ Hráč 6</textarea>
 
         function renderTeamsUI() {
             const container = document.getElementById("teams-display");
-            container.innerHTML = ""; // Vyčištění
+            container.innerHTML = ""; 
 
             teams.forEach((team, index) => {
-                // Nevykresluj prázdné týmy (když se teprve vytváří nový)
                 if (team.length === 0 && index !== 0) return;
 
                 const card = document.createElement("div");
