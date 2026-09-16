@@ -8,7 +8,7 @@
     <title>Maximo smyko - Tvorba týmů</title>
     <style>
         body {
-            /* Tady je napojené tvé pozadí s lahvemi */
+            /* Napojené tvé pozadí */
             background-image: url('vnitrekmaximo.png');
             background-size: cover;
             background-position: center;
@@ -26,25 +26,26 @@
             box-sizing: border-box;
         }
 
-        /* Aby byl text čitelný přes to pestré pozadí, dáme mu poloprůhledný podklad */
+        /* Kontejner s poloprůhledným tmavým pozadím pro čitelnost */
         .container {
-            background: rgba(11, 11, 26, 0.85);
+            background: rgba(10, 20, 22, 0.9);
             padding: 30px;
             border-radius: 20px;
             text-align: center;
             max-width: 800px;
             width: 100%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            border: 2px solid rgba(138, 43, 226, 0.3);
+            border: 2px solid rgba(212, 175, 55, 0.4); /* Zlatavý nádech */
             backdrop-filter: blur(5px);
         }
 
         h2 {
             margin-top: 0;
             margin-bottom: 25px;
-            text-shadow: 0 0 15px rgba(138, 43, 226, 1);
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.8); /* Zlatá záře */
             font-size: 36px;
             letter-spacing: 1px;
+            color: #ffd700;
         }
 
         .input-group {
@@ -55,15 +56,15 @@
             display: block;
             margin-bottom: 10px;
             font-weight: bold;
-            color: #e9d5ff;
+            color: #ffffff;
             font-size: 20px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         input[type="number"] {
-            background: rgba(21, 21, 42, 0.9);
+            background: rgba(0, 0, 0, 0.6);
             color: white;
-            border: 2px solid #8a2be2;
+            border: 2px solid #1c5253; /* Tmavě modrozelená z lahví */
             border-radius: 8px;
             padding: 10px;
             font-size: 20px;
@@ -71,9 +72,14 @@
             text-align: center;
             outline: none;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus, .name-row input:focus {
+            border-color: #ffd700;
         }
 
-        /* Styly pro nová oddělená políčka na jména */
+        /* Styly pro políčka na jména */
         #names-list {
             display: flex;
             flex-direction: column;
@@ -89,18 +95,19 @@
         }
 
         .name-row input {
-            background: rgba(21, 21, 42, 0.9);
+            background: rgba(0, 0, 0, 0.6);
             color: white;
-            border: 2px solid #8a2be2;
+            border: 2px solid #1c5253;
             border-radius: 8px;
             padding: 10px 15px;
             font-size: 18px;
             width: 200px;
             outline: none;
+            transition: border-color 0.3s;
         }
 
         .remove-btn {
-            background: #ff4757;
+            background: #d32f2f;
             color: white;
             border: none;
             border-radius: 50%;
@@ -111,33 +118,37 @@
             font-weight: bold;
             padding: 0;
             line-height: 30px;
-            box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+            box-shadow: 0 0 10px rgba(211, 47, 47, 0.5);
         }
 
         .add-btn {
-            background: #2ed573;
+            background: #1c5253;
             color: white;
-            border: none;
+            border: 1px solid #2a7a7c;
             border-radius: 8px;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
             font-weight: bold;
             margin-bottom: 25px;
-            box-shadow: 0 0 10px rgba(46, 213, 115, 0.5);
+            box-shadow: 0 0 10px rgba(28, 82, 83, 0.5);
+        }
+        
+        .add-btn:hover {
+            background: #23696b;
         }
 
-        /* Hlavní tlačítka (Začít losovat / Zatočit) */
+        /* Hlavní tlačítka - do zlata */
         .primary-btn {
-            background: linear-gradient(90deg, #9400d3, #8a2be2);
+            background: linear-gradient(90deg, #d4af37, #f9a825);
             border: none;
             padding: 15px 50px;
-            color: white;
+            color: #111; /* Tmavý text pro lepší čitelnost na zlaté */
             font-size: 20px;
             border-radius: 30px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
             transition: transform 0.2s, box-shadow 0.2s;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -145,11 +156,12 @@
 
         .primary-btn:hover:not(:disabled) {
             transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(138, 43, 226, 1);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 1);
         }
 
         .primary-btn:disabled {
             background: #4a4a4a;
+            color: #888;
             box-shadow: none;
             cursor: not-allowed;
             opacity: 0.6;
@@ -168,22 +180,22 @@
 
         canvas {
             border-radius: 50%;
-            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6);
-            border: 6px solid #2a2a4a;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+            border: 6px solid #1c5253;
             background: #000;
         }
 
-        /* Obrázek koruny uprostřed rulety */
+        /* Obrázek korunky uprostřed rulety */
         #center-logo {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px;  /* Velikost koruny - můžeš si upravit */
+            width: 80px;  
             height: auto;
             z-index: 5;
             filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
-            pointer-events: none; /* Aby neblokovala klikání */
+            pointer-events: none;
         }
 
         .pointer {
@@ -204,7 +216,7 @@
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #e9d5ff;
+            color: #ffd700;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
@@ -214,7 +226,7 @@
             font-weight: bold;
             margin-bottom: 20px;
             color: #ffffff;
-            text-shadow: 0 0 15px #8a2be2, 0 0 30px #9400d3;
+            text-shadow: 0 0 15px #d4af37, 0 0 30px #f9a825;
         }
 
         #teams-display {
@@ -226,8 +238,8 @@
         }
 
         .team-card {
-            background: rgba(21, 21, 42, 0.9);
-            border: 2px solid #9400d3;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #d4af37;
             border-radius: 12px;
             padding: 15px 25px;
             min-width: 160px;
@@ -237,8 +249,8 @@
 
         .team-card h3 {
             margin: 0 0 12px 0;
-            color: #e9d5ff;
-            border-bottom: 2px solid #9400d3;
+            color: #ffd700;
+            border-bottom: 2px solid #1c5253;
             padding-bottom: 8px;
             font-size: 20px;
             text-align: center;
@@ -294,7 +306,7 @@
         </div>
         
         <br>
-        <button class="primary-btn" id="spin-btn" onclick="spin()">Zatočit (Spin)</button>
+        <button class="primary-btn" id="spin-btn" onclick="spin()">Zatočit</button>
 
         <!-- Zde se budou generovat týmy -->
         <div id="teams-display"></div>
@@ -342,11 +354,10 @@
         let currentAngle = 0;
         let isSpinning = false;
         
-        // Barvy dílků
-        const colors = ["#8a2be2", "#663399", "#9400d3", "#4b0082", "#9932cc", "#7b68ee"];
+        // Barvy rulety: kombinace tmavé modrozelené z lahví a zlaté z korunky
+        const colors = ["#143a3b", "#d4af37", "#1c5253", "#f9a825", "#0d2728", "#c5a030"];
 
         function startRoulette() {
-            // Posbíráme jména ze všech políček
             const inputs = document.querySelectorAll("#names-list input");
             remainingNames = Array.from(inputs).map(inp => inp.value.trim()).filter(n => n !== "");
             
@@ -389,18 +400,23 @@
                 ctx.fillStyle = colors[i % colors.length];
                 ctx.fill();
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = "#15152a";
+                ctx.strokeStyle = "#0a1416";
                 ctx.stroke();
 
                 ctx.save();
                 ctx.translate(radius, radius);
                 ctx.rotate(startAngle + sliceAngle / 2);
                 ctx.textAlign = "right";
-                ctx.fillStyle = "#ffffff";
-                // Zvětšený font v ruletě
+                
+                // Barva textu: na zlatém pozadí černá pro čitelnost, jinak bílá
+                if (colors[i % colors.length] === "#d4af37" || colors[i % colors.length] === "#f9a825" || colors[i % colors.length] === "#c5a030") {
+                    ctx.fillStyle = "#111111";
+                } else {
+                    ctx.fillStyle = "#ffffff";
+                }
+                
                 ctx.font = "bold 20px sans-serif";
                 
-                // Necháme uprostřed volné místo pro korunu (proto text končí dál od středu)
                 if (remainingNames.length === 1) {
                     ctx.textAlign = "center";
                     ctx.fillText(remainingNames[i], 0, -radius/2);
@@ -413,10 +429,10 @@
             // Vykreslení tmavého kruhu uprostřed pod korunu (aby texty nezasahovaly pod ni)
             ctx.beginPath();
             ctx.arc(radius, radius, 55, 0, 2 * Math.PI);
-            ctx.fillStyle = "#0b0b1a";
+            ctx.fillStyle = "#0a1416";
             ctx.fill();
             ctx.lineWidth = 3;
-            ctx.strokeStyle = "#8a2be2";
+            ctx.strokeStyle = "#d4af37";
             ctx.stroke();
         }
 
