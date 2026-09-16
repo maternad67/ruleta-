@@ -8,7 +8,6 @@
     <title>Maximo smyko - Tvorba týmů</title>
     <style>
         body {
-            /* Napojené tvé pozadí */
             background-image: url('vnitrekmaximo.png');
             background-size: cover;
             background-position: center;
@@ -26,7 +25,6 @@
             box-sizing: border-box;
         }
 
-        /* Kontejner s poloprůhledným tmavým pozadím pro čitelnost */
         .container {
             background: rgba(10, 20, 22, 0.9);
             padding: 30px;
@@ -35,14 +33,14 @@
             max-width: 800px;
             width: 100%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            border: 2px solid rgba(212, 175, 55, 0.4); /* Zlatavý nádech */
+            border: 2px solid rgba(212, 175, 55, 0.4);
             backdrop-filter: blur(5px);
         }
 
         h2 {
             margin-top: 0;
             margin-bottom: 25px;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.8); /* Zlatá záře */
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.8);
             font-size: 36px;
             letter-spacing: 1px;
             color: #ffd700;
@@ -64,7 +62,7 @@
         input[type="number"] {
             background: rgba(0, 0, 0, 0.6);
             color: white;
-            border: 2px solid #1c5253; /* Tmavě modrozelená z lahví */
+            border: 2px solid #1c5253;
             border-radius: 8px;
             padding: 10px;
             font-size: 20px;
@@ -79,7 +77,6 @@
             border-color: #ffd700;
         }
 
-        /* Styly pro políčka na jména */
         #names-list {
             display: flex;
             flex-direction: column;
@@ -104,6 +101,12 @@
             width: 200px;
             outline: none;
             transition: border-color 0.3s;
+        }
+        
+        /* Zajištění poloprůhledné barvy pro zástupný text (Hráč 1, Hráč 2...) */
+        .name-row input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            font-style: italic;
         }
 
         .remove-btn {
@@ -138,12 +141,19 @@
             background: #23696b;
         }
 
-        /* Hlavní tlačítka - do zlata */
+        /* Skupina tlačítek vedle sebe */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
         .primary-btn {
             background: linear-gradient(90deg, #d4af37, #f9a825);
             border: none;
-            padding: 15px 50px;
-            color: #111; /* Tmavý text pro lepší čitelnost na zlaté */
+            padding: 15px 40px;
+            color: #111;
             font-size: 20px;
             border-radius: 30px;
             cursor: pointer;
@@ -167,6 +177,24 @@
             opacity: 0.6;
         }
 
+        /* Tlačítko Zpět */
+        .secondary-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #d4af37;
+            padding: 15px 30px;
+            color: #d4af37;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .secondary-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+        }
+
         #roulette-screen {
             display: none;
             margin-top: 10px;
@@ -185,7 +213,6 @@
             background: #000;
         }
 
-        /* Obrázek korunky uprostřed rulety */
         #center-logo {
             position: absolute;
             top: 50%;
@@ -275,7 +302,7 @@
 
     <!-- Úvodní menu -->
     <div id="menu-screen" class="container">
-        <h2>Maximo smyko - Tvorba týmů</h2>
+        <h2>Maximálně smyková ruleta</h2>
         
         <div class="input-group">
             <label for="team-size">Počet hráčů v jednom týmu:</label>
@@ -300,13 +327,14 @@
         
         <div class="wheel-wrapper" id="wheel-container">
             <div class="pointer"></div>
-            <!-- TVOJE LOGO UPROSTŘED -->
             <img src="korunka.png" id="center-logo" alt="Maximo smyko">
             <canvas id="wheel" width="380" height="380"></canvas>
         </div>
         
-        <br>
-        <button class="primary-btn" id="spin-btn" onclick="spin()">Zatočit</button>
+        <div class="action-buttons">
+            <button class="secondary-btn" onclick="goBack()">Zpět</button>
+            <button class="primary-btn" id="spin-btn" onclick="spin()">Zatočit</button>
+        </div>
 
         <!-- Zde se budou generovat týmy -->
         <div id="teams-display"></div>
@@ -314,17 +342,18 @@
 
     <script>
         // Inicializace dynamických políček
-        const initialNames = ["Hráč 1", "Hráč 2", "Hráč 3", "Hráč 4"];
+        let playerCount = 0; // Počítadlo pro číslování "Hráč 1", "Hráč 2" atd.
         
-        function addNameField(value = "") {
+        function addNameField() {
+            playerCount++;
             const list = document.getElementById("names-list");
             const row = document.createElement("div");
             row.className = "name-row";
             
             const input = document.createElement("input");
             input.type = "text";
-            input.value = value;
-            input.placeholder = "Jméno hráče";
+            // Zde se nastavuje placeholder (šedý poloprůhledný text na pozadí)
+            input.placeholder = "Hráč " + playerCount;
             
             const removeBtn = document.createElement("button");
             removeBtn.className = "remove-btn";
@@ -338,8 +367,18 @@
             list.appendChild(row);
         }
 
-        // Naplnění počátečních políček
-        initialNames.forEach(name => addNameField(name));
+        // Naplnění počátečních 6 políček, jak jsi to měl původně na screenu
+        for(let i = 0; i < 6; i++) {
+            addNameField();
+        }
+
+        // Funkce pro návrat do hlavního menu (Tlačítko Zpět)
+        function goBack() {
+            document.getElementById("roulette-screen").style.display = "none";
+            document.getElementById("menu-screen").style.display = "block";
+            // Obnoví zobrazení samotné rulety, pokud už předtím zmizela
+            document.getElementById("wheel-container").style.display = "inline-block";
+        }
 
 
         // Logika rulety
@@ -354,17 +393,18 @@
         let currentAngle = 0;
         let isSpinning = false;
         
-        // Barvy rulety: kombinace tmavé modrozelené z lahví a zlaté z korunky
         const colors = ["#143a3b", "#d4af37", "#1c5253", "#f9a825", "#0d2728", "#c5a030"];
 
         function startRoulette() {
             const inputs = document.querySelectorAll("#names-list input");
+            
+            // Filtrujeme pouze políčka, do kterých se něco napsalo. Prázdná políčka se ignorují.
             remainingNames = Array.from(inputs).map(inp => inp.value.trim()).filter(n => n !== "");
             
             teamSize = parseInt(document.getElementById("team-size").value);
             
             if(remainingNames.length < 2) {
-                alert("Zadej prosím alespoň 2 jména.");
+                alert("Zadej prosím jména alespoň do 2 políček.");
                 return;
             }
             if(teamSize < 1 || isNaN(teamSize)) {
@@ -378,6 +418,8 @@
 
             document.getElementById("menu-screen").style.display = "none";
             document.getElementById("roulette-screen").style.display = "block";
+            document.getElementById("spin-btn").disabled = false;
+            document.getElementById("winner-text").innerText = "";
             
             updateStatusText();
             renderTeamsUI();
@@ -408,7 +450,6 @@
                 ctx.rotate(startAngle + sliceAngle / 2);
                 ctx.textAlign = "right";
                 
-                // Barva textu: na zlatém pozadí černá pro čitelnost, jinak bílá
                 if (colors[i % colors.length] === "#d4af37" || colors[i % colors.length] === "#f9a825" || colors[i % colors.length] === "#c5a030") {
                     ctx.fillStyle = "#111111";
                 } else {
@@ -426,7 +467,6 @@
                 ctx.restore();
             }
             
-            // Vykreslení tmavého kruhu uprostřed pod korunu (aby texty nezasahovaly pod ni)
             ctx.beginPath();
             ctx.arc(radius, radius, 55, 0, 2 * Math.PI);
             ctx.fillStyle = "#0a1416";
@@ -501,7 +541,6 @@
             } else {
                 document.getElementById("wheel-container").style.display = "none";
                 document.getElementById("status-text").innerText = "Rozlosování je kompletní!";
-                document.getElementById("winner-text").innerText = "";
             }
         }
 
