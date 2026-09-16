@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maximo smyko - Tvorba týmů</title>
+    <style>
+        body {
+            background-color: #0b0b1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+            font-size: 32px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #d8b4fe;
+            font-size: 18px;
+        }
+
+        input[type="number"] {
+            background: #15152a;
+            color: white;
+            border: 2px solid #8a2be2;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 18px;
+            width: 100px;
+            text-align: center;
+            outline: none;
+        }
+
+        textarea {
+            width: 300px;
+            height: 150px;
+            background: #15152a;
+            color: white;
+            border: 2px solid #8a2be2;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+            resize: none;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        button {
+            background: linear-gradient(90deg, #9400d3, #8a2be2);
+            border: none;
+            padding: 15px 40px;
+            color: white;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.9);
+        }
+
+        button:disabled {
+            background: #4a4a4a;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #roulette-screen {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        canvas {
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(138, 43, 226, 0.3);
+            border: 5px solid #2a2a4a;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 35px solid #e0e0e0;
+            z-index: 10;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+        #status-text {
+            height: 30px;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #d8b4fe;
+        }
+
+        #winner-text {
+            height: 35px;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 0 0 10px #8a2be2;
+        }
+
+        /* Sekce pro zobrazení vylosovaných týmů */
+        #teams-display {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .team-card {
+            background: #15152a;
+            border: 2px solid #663399;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 150px;
+            text-align: left;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .team-card h3 {
+            margin: 0 0 10px 0;
+            color: #d8b4fe;
+            border-bottom: 1px solid #663399;
+            padding-bottom: 5px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .team-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .team-card li {
+            margin-bottom: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Úvodní menu -->
+    <div id="menu-screen" class="container">
+        <h2>Maximo smyko - Tvorba týmů</h2>
+        
+        <div class="input-group">
+            <label for="team-size">Počet hráčů v jednom týmu:</label>
+            <input type="number" id="team-size" value="2" min="1">
+        </div>
+
+        <div class="input-group">
+            <label for="names-input">Jména hráčů (každé na nový řádek):</label>
+            <textarea id="names-input">
+Hráč 1
+Hráč 2
+Hráč 3
+Hráč 4
+Hráč 5
+Hráč 6</textarea>
+        </div>
+        
+        <button onclick="startRoulette()">Začít losovat</button>
+    </div>
+
+    <!-- Obrazovka s ruletou -->
+    <div id="roulette-screen" class="container">
+        <div id="status-text">Točíme pro: Tým 1</div>
+        <div id="winner-text"></div>
+        
+        <div class="wheel-wrapper" id="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="350" height="350"></canvas>
+        </div>
+        
+        <br>
+        <button id="spin-btn" onclick="spin()">Zatočit (Spin)</button>
+
+        <!-- Zde se budou generovat týmy -->
+        <div id="teams-display"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("wheel");
+        const ctx = canvas.getContext("2d");
+        const radius = canvas.width / 2;
+        
+        let remainingNames = [];
+        let teamSize = 2;
+        let teams = [[]]; // Pole pro ukládání týmů
+        let currentTeamIndex = 0; // Který tým se zrovna plní
+
+        let currentAngle = 0;
+        let isSpinning = false;
+        
+        const colors = ["#8a2be2", "#663399", "#9400d3", "#4b0082", "#9932cc", "#7b68ee"];
+
+        function startRoulette() {
+            const input = document.getElementById("names-input").value;
+            remainingNames = input.split('\n').map(n => n.trim()).filter(n => n !== "");
+            teamSize = parseInt(document.getElementById("team-size").value);
+            
+            if(remainingNames.length < 2) {
+                alert("Zadej prosím alespoň 2 jména.");
+                return;
+            }
+            if(teamSize < 1 || isNaN(teamSize)) {
+                alert("Velikost týmu musí být alespoň 1.");
+                return;
+            }
+
+            // Inicializace proměnných pro novou hru
+            teams = [[]];
+            currentTeamIndex = 0;
+            currentAngle = 0;
+
+            document.getElementById("menu-screen").style.display = "none";
+            document.getElementById("roulette-screen").style.display = "block";
+            
+            updateStatusText();
+            renderTeamsUI();
+            drawWheel();
+        }
+
+        function drawWheel() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (remainingNames.length === 0) return; // Není co kreslit
+
+            const sliceAngle = (2 * Math.PI) / remainingNames.length;
+
+            for (let i = 0; i < remainingNames.length; i++) {
+                const startAngle = currentAngle + i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius, startAngle, endAngle);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#15152a";
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(startAngle + sliceAngle / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 16px sans-serif";
+                
+                // Pokud je v ruletě už jen jedno jméno, vycentrujeme ho jinak
+                if (remainingNames.length === 1) {
+                    ctx.textAlign = "center";
+                    ctx.fillText(remainingNames[i], 0, 0);
+                } else {
+                    ctx.fillText(remainingNames[i], radius - 20, 6);
+                }
+                
+                ctx.restore();
+            }
+        }
+
+        function spin() {
+            if (isSpinning || remainingNames.length === 0) return;
+            isSpinning = true;
+            
+            document.getElementById("winner-text").innerText = "Losování...";
+            document.getElementById("spin-btn").disabled = true;
+
+            const spinTimeTotal = Math.random() * 2000 + 3000; 
+            const spinAngleStart = Math.random() * 10 + 20; 
+            
+            let spinTime = 0;
+
+            function easeOut(t, b, c, d) {
+                const ts = (t /= d) * t;
+                const tc = ts * t;
+                return b + c * (tc + -3 * ts + 3 * t);
+            }
+
+            function rotate() {
+                spinTime += 30;
+                if (spinTime >= spinTimeTotal) {
+                    isSpinning = false;
+                    processWinner();
+                    return;
+                }
+                const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+                currentAngle += (spinAngle * Math.PI / 180);
+                drawWheel();
+                requestAnimationFrame(rotate);
+            }
+            rotate();
+        }
+
+        function processWinner() {
+            // Výpočet indexu výherce
+            let index = 0;
+            if (remainingNames.length > 1) {
+                const sliceAngle = (2 * Math.PI) / remainingNames.length;
+                const degrees = (currentAngle % (2 * Math.PI));
+                let winnerAngle = (3 * Math.PI / 2) - degrees;
+                if (winnerAngle < 0) {
+                    winnerAngle += 2 * Math.PI;
+                }
+                index = Math.floor(winnerAngle / sliceAngle);
+            }
+
+            const winner = remainingNames[index];
+            document.getElementById("winner-text").innerText = winner + "!";
+
+            // 1. Přidat výherce do aktuálního týmu
+            teams[currentTeamIndex].push(winner);
+            
+            // 2. Odebrat výherce z rulety
+            remainingNames.splice(index, 1);
+
+            // 3. Zkontrolovat, jestli se tým naplnil
+            if (teams[currentTeamIndex].length >= teamSize && remainingNames.length > 0) {
+                teams.push([]); // Vytvoříme další tým
+                currentTeamIndex++; // Posuneme se na něj
+            }
+
+            renderTeamsUI();
+            updateStatusText();
+
+            // Pokud ještě zbývají lidé, překreslíme ruletu bez výherce
+            if (remainingNames.length > 0) {
+                drawWheel();
+                document.getElementById("spin-btn").disabled = false;
+            } else {
+                // Všichni byli rozlosováni
+                document.getElementById("wheel-container").style.display = "none";
+                document.getElementById("status-text").innerText = "Rozlosování je kompletní!";
+                document.getElementById("winner-text").innerText = "";
+            }
+        }
+
+        function updateStatusText() {
+            if (remainingNames.length > 0) {
+                const currentTeamNumber = currentTeamIndex + 1;
+                const currentMembers = teams[currentTeamIndex].length;
+                document.getElementById("status-text").innerText = `Točíme pro: Tým ${currentTeamNumber} (${currentMembers}/${teamSize})`;
+            }
+        }
+
+        function renderTeamsUI() {
+            const container = document.getElementById("teams-display");
+            container.innerHTML = ""; // Vyčištění
+
+            teams.forEach((team, index) => {
+                // Nevykresluj prázdné týmy (když se teprve vytváří nový)
+                if (team.length === 0 && index !== 0) return;
+
+                const card = document.createElement("div");
+                card.className = "team-card";
+                
+                const title = document.createElement("h3");
+                title.innerText = `Tým ${index + 1}`;
+                card.appendChild(title);
+
+                const list = document.createElement("ul");
+                team.forEach(member => {
+                    const li = document.createElement("li");
+                    li.innerText = member;
+                    list.appendChild(li);
+                });
+                
+                card.appendChild(list);
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
